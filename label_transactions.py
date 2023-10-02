@@ -1,10 +1,12 @@
 from tkinter import *
 from tkinter import ttk
 from settings import *
+import csv
 
 transaction_iter = []
 labelled_transactions = []
 current_transaction = {}
+LABELS = [row for row in csv.DictReader(open("budgets/buckets.csv", mode="r")) if row.values]
 
 HEADING = ["Date", "Description", "Amount", "Account Name", "Category", "Budget Category"]
 
@@ -18,7 +20,6 @@ def process(list_of_transactions):
             fill_row(table[i], [c.cget("text") for c in table[i+1]])
 
     def budget_cat(budget_cat, current_transaction, row):
-
         row[-1].config(text=budget_cat)
         current_transaction[HEADING[-1]] = budget_cat
 
