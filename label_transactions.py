@@ -6,12 +6,14 @@ import csv
 transaction_iter = []
 labelled_transactions = []
 current_transaction = {}
-LABELS = [row for row in csv.DictReader(open("budgets/buckets.csv", mode="r")) if row.values]
+input_buffer = []
+BUDGETS = [row for row in csv.DictReader(open("budgets/buckets.csv", mode="r")) if row.values]
+LABELS = {row["key"]:row["name"] for row in BUDGETS}
 
 HEADING = ["Date", "Description", "Amount", "Account Name", "Category", "Budget Category"]
 
 def display_data(t):
-    return [t["Date"].strftime("%m/%d/%Y"), t["Description"], "${:.2f}".format(t["Amount"]), t["Account Name"], t["Category"], ""]
+    return [t["Date"].strftime("%m/%d/%Y"), t["Description"], "${:.2f}".format(t["Amount"]), t["Account Name"], t["Category"], t.get("Budget Category","")]
 
 def process(list_of_transactions):
 
@@ -19,13 +21,24 @@ def process(list_of_transactions):
         for i in range(1, DISPLAY_ROWS):
             fill_row(table[i], [c.cget("text") for c in table[i+1]])
 
-    def budget_cat(budget_cat, current_transaction, row):
-        row[-1].config(text=budget_cat)
-        current_transaction[HEADING[-1]] = budget_cat
+    #add key to buffer. if matches a key empty buffer return category
+    def budget_cat(key):
+        global input_buffer
+        if key == "BackSpace":
+            input_buffer.clear()
+        else:
+            input_buffer.append(key)
+        string_input = "".join(input_buffer)
+        input_display.config(text="INPUT: " + string_input)
+        return LABELS.get(string_input,"")
 
-    def display_next_transaction(key):
+    def categorize(transaction, cat):
+        table[-1][-1].config(text=cat)
+        transaction[HEADING[-1]] = cat
+        labelled_transactions.append(transaction)
+
+    def display_next_transaction():
         global current_transaction
-        budget_cat(key, current_transaction, table[-1])
         try:
             t = next(transaction_iter)
             current_transaction = t
@@ -41,7 +54,11 @@ def process(list_of_transactions):
 
     def key_press(event):
         key = event.keysym
-        display_next_transaction(key)
+        category = budget_cat(key)
+        if category:
+            input_buffer.clear()
+            categorize(current_transaction, category)
+            display_next_transaction()
 
     def create_table(root, rows, columns):
         # Create a table (2D list) to store Label widgets
@@ -62,11 +79,19 @@ def process(list_of_transactions):
     root.geometry("800x800")
     content = ttk.Frame(root)
     content.grid(column=0, row=0)
-
+    input_display = Label(root, text="INPUT: ")
+    input_display.grid(row=DISPLAY_ROWS+2, column=0, columnspan=len(HEADING))
+    i = 0
+    for k, v in LABELS.items():
+        key_legend = Label(root, text=v, width=15, height=1)
+        key_legend.grid(row=DISPLAY_ROWS+3+i%7, column=0+(i//7*2), columnspan=1)
+        key_legend = Label(root, text=k, width=15, height=1)
+        key_legend.grid(row=DISPLAY_ROWS+3+i%7, column=1+(i//7*2), columnspan=1)
+        i +=1
     table = create_table(root, rows=DISPLAY_ROWS+1, columns=len(HEADING))
 
     fill_row(table[0],HEADING)
-
+    display_next_transaction()
     # Bind the key press event to the window
     root.bind("<Key>", key_press)
     # Start the main event loop
