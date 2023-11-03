@@ -42,7 +42,7 @@ def create_table(root):
 
 ### Refresh the table according to transaction position
 def refresh_rows(table, transaction_index, transactions):
-        position_of_labelling_transaction = DISPLAY_ROWS
+        position_of_labelling_transaction = DISPLAY_ROWS - 3
         for k in range(1, DISPLAY_ROWS+1):
             i = transaction_index - position_of_labelling_transaction + k
             fill_row(table[k], [c for c in row_display_data(labeling.get_transaction(i))])
