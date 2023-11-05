@@ -24,7 +24,10 @@ def input_logic(key, input_display):
     if key == "BackSpace":
         if len(input_buffer) == 0 and index > 0:
             index -= 1
+            transactions[index]["Budget Category"] = ""
         input_buffer.clear()
+        string_input = "".join(input_buffer)
+        input_display.config(text="INPUT: " + string_input)
         #refresh
         return True
     else:
