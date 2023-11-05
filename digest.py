@@ -17,10 +17,13 @@ def flip_credits_negative(row):
     else:
         return row["Amount"]
 
-def digest():
-    transactions = pd.read_csv(choose_file())
+def format_transactions(transactions):
     transactions["Date"] = pd.to_datetime(transactions["Date"])
     transactions["Amount"] = transactions.apply(flip_credits_negative, axis=1)
+
+def digest():
+    transactions = pd.read_csv(choose_file())
+    format_transactions(transactions)
     l.process(transactions.to_dict(orient="records"))
 
 if __name__ == "__main__":
