@@ -7,7 +7,7 @@ from settings import *
 
 
 def choose_file():
-    transaction_files = os.listdir(TRANSACTIONS_DIR)
+    transaction_files = [item for item in os.listdir(TRANSACTIONS_DIR) if os.path.isfile(os.path.join(TRANSACTIONS_DIR, item))]
     transaction_files.sort()
     return TRANSACTIONS_DIR + "/" + transaction_files[0]
 
@@ -24,6 +24,8 @@ def format_transactions(transactions):
 def digest():
     transactions = pd.read_csv(choose_file())
     format_transactions(transactions)
+    transactions = transactions[transactions["Date"] > pd.to_datetime('2023-09-01')]
+    #TODO compare to saved
     l.process(transactions.to_dict(orient="records"))
 
 if __name__ == "__main__":
