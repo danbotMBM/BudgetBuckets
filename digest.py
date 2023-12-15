@@ -3,13 +3,13 @@ import os
 import re
 import labeling as l
 from settings import *
+from tkinter import filedialog
 
 
 
 def choose_file():
-    transaction_files = [item for item in os.listdir(TRANSACTIONS_DIR) if os.path.isfile(os.path.join(TRANSACTIONS_DIR, item))]
-    transaction_files.sort()
-    return TRANSACTIONS_DIR + "/" + transaction_files[0]
+    file_path = filedialog.askopenfilename()
+    return file_path
 
 def flip_credits_negative(row):
     if row["Transaction Type"] == "credit":
